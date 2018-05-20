@@ -11,11 +11,9 @@ import pandas as pd
 
 from os.path import join
 from os import listdir
-from skimage import io, transform
 from scipy.misc import imread, imresize, imsave
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
-from torchvision import transforms, utils
 
 from utils import read_textfile_by_line, mkdir, mv, cp
 
@@ -127,10 +125,6 @@ def train_val_split(dataset, batch_size):
     trainloader = DataLoader(dataset, batch_size=batch_size, sampler=train_sampler)
     validationloader = DataLoader(dataset, batch_size=batch_size, sampler=validation_sampler)
     return trainloader, validationloader
-
-class ToTensor(object):
-    def __call__(self, x):
-        return torch.from_numpy(x).float()
 
 class XrayDataset(Dataset):
     '''
