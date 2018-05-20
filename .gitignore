@@ -102,3 +102,18 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# data
+data/
+
+# model
+models/
+
+# logging
+log/
+
+# stats (temporary)
+stats/
+
+# summary
+summary/
