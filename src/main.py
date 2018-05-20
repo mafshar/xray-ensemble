@@ -45,4 +45,12 @@ if __name__ == '__main__':
         mode='test',
         transform=composed_transforms)
 
-    
+    train_loader, val_loader = datasets.train_val_split(
+        train_dataset,
+        batch_size=4,
+        num_workers=8)
+
+    test_loader = datasets.test_loader(
+        test_dataset,
+        batch_size=4,
+        num_workers=8)
