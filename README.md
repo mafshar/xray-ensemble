@@ -46,8 +46,6 @@ TBA
 ## Setup
 Setup your data by following these instructions. The download link is [here](https://nihcc.app.box.com/v/ChestXray-NIHCC/folder/36938765345)
 
-(For the smaller dataset, the download link is [here](https://www.kaggle.com/nih-chest-xrays/sample))
-
 * Locally, create a `/data` directory in the project root.
 
 * Download all tar files from the `/images` directory and expand them locally in `/data/images`.
@@ -59,9 +57,6 @@ When finished, your `/data` directory should look like this:
 ```
 /data
   /images
-  /labels
-  /test
-  /train
   Data_Entry_2017.csv
   test_list.txt
   train_val_list.txt
