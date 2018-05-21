@@ -106,7 +106,7 @@ def partition_images(data_path):
             mode='test')
     return
 
-def train_val_split(dataset, batch_size):
+def train_val_split(dataset, batch_size, num_workers=0):
     ## define our indices
     num_train = len(dataset)
     indices = list(range(num_train))
@@ -118,13 +118,19 @@ def train_val_split(dataset, batch_size):
 
     ## define our samplers -- we use a SubsetRandomSampler because it will return
     ## a random subset of the split defined by the given indices without replacement
-
     train_sampler = SubsetRandomSampler(train_idx)
     validation_sampler = SubsetRandomSampler(validation_idx)
 
-    trainloader = DataLoader(dataset, batch_size=batch_size, sampler=train_sampler)
-    validationloader = DataLoader(dataset, batch_size=batch_size, sampler=validation_sampler)
+    trainloader = DataLoader(dataset, batch_size=batch_size, sampler=train_sampler, num_workers=num_workers)
+    validationloader = DataLoader(dataset, batch_size=batch_size, sampler=validation_sampler, num_workers=num_workers)
     return trainloader, validationloader
+
+def test_loader(dataset, batch_size, num_workers=0):
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers)
 
 class XrayDataset(Dataset):
     '''
