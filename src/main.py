@@ -9,14 +9,52 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import numpy as np
+import torch.nn as nn
+import torch.optim as optim
 
+from os.path import join
 from processing import datasets, transformations
+from processing.datasets import DATA_DIR
+from deep_models.models import MODEL_DIR
+from deep_models import models
 from torchvision import transforms, utils
 
-DATA_DIR = './data'
 IMG_SIZE = 256
 
 input_partitioning_flag = False
+
+def train(train_loader, val_loader, model_path, num_epochs=10):
+    net = models.ConvNet()
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+
+    for epoch in range(num_epochs):
+        running_loss = 0.0
+        for i, data in enumerate(train_loader, 0):
+
+            inputs, labels = data
+
+            ## zero the parameter gradients
+            optimizer.zero_grad()
+
+            ## forward + backprop + optimize
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            # print statistics:
+            running_loss += loss.item()
+            if i % 5 == 0:
+                print '[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 2000)
+                running_loss = 0.0
+
+    return
+
+
+def evaluate(test_loader, model_path):
+    pass
 
 
 if __name__ == '__main__':
@@ -54,3 +92,10 @@ if __name__ == '__main__':
         test_dataset,
         batch_size=4,
         num_workers=8)
+
+    models.initialize_models()
+
+    train(
+        train_loader,
+        val_loader,
+        join(MODEL_DIR, 'hernia_vs_no_findings'))
