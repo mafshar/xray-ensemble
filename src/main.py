@@ -25,9 +25,9 @@ input_partitioning_flag = False
 
 def train(train_loader, val_loader, model_path, num_epochs=10):
     net = models.ConvNet()
-
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    weights = torch.randn(2)
+    criterion = nn.CrossEntropyLoss(weight=weights)
+    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9, nesterov=True)
 
     for epoch in range(num_epochs):
         running_loss = 0.0
@@ -45,9 +45,13 @@ def train(train_loader, val_loader, model_path, num_epochs=10):
             optimizer.step()
 
             # print statistics:
+            ## print after every 4 batches
             running_loss += loss.item()
-            if i % 5 == 0:
-                print '[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 2000)
+            if i % 4 == 3:
+                print '==> epoch:\n\t%d' % (epoch + 1)
+                print '==> samples processed:\n\t%5d' % (i + 1)
+                print '==> loss:\n\t%.3f' % (running_loss / 4)
+                print '-' * 30
                 running_loss = 0.0
 
     return
@@ -83,7 +87,7 @@ if __name__ == '__main__':
         mode='test',
         transform=composed_transforms)
 
-    train_loader, val_loader = datasets.train_val_split(
+    train_loader, val_loader = datasets.train_val_split_loader(
         train_dataset,
         batch_size=4,
         num_workers=8)

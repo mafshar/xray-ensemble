@@ -106,7 +106,7 @@ def partition_images(data_path):
             mode='test')
     return
 
-def train_val_split(dataset, batch_size, num_workers=0):
+def train_val_split_loader(dataset, batch_size, num_workers=0):
     ## define our indices
     num_train = len(dataset)
     indices = list(range(num_train))
@@ -133,8 +133,6 @@ def test_loader(dataset, batch_size, num_workers=0):
         num_workers=num_workers)
 
 class XrayDataset(Dataset):
-    '''
-    '''
 
     def __init__(self, c1, c2, mode='train', transform=None):
         self.c1 = join(TRAIN_DIR, c1) if mode == 'train' else join(TEST_DIR, c1)

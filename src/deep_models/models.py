@@ -34,18 +34,18 @@ class ConvNet(nn.Module):
     ConvLayer5  --> 64 input channels, 64 output channels, 5x5 conv; ReLU Activation
     FC1         --> fully connected layer with 1024 hidden units; ReLU Activation
     Droput      --> dropout layer with p(dropout) = 0.2
-    FC2         -->
-
+    FC2         --> fully connected layer with 2 softmax output layers
     '''
 
-    def __init__(self):
+    def __init__(self, dp_prob=0.2):
         super(ConvNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, 5) ## 1 input channel, 10 feature maps (kernels), 5x5 convolution
         self.conv2 = nn.Conv2d(10, 20, 5)
         self.conv3 = nn.Conv2d(20, 40, 5)
         self.conv4 = nn.Conv2d(40, 64, 5)
         self.conv5 = nn.Conv2d(64, 64, 5)
-        self.fc1 = nn.Linear(64 * 5 * 5, 1024)
+        self.fc1 = nn.Linear(64 * 4 * 4, 1024)
+        self.dp_prob = dp_prob
         self.fc2 = nn.Linear(1024, 2)
         return
 
@@ -55,8 +55,10 @@ class ConvNet(nn.Module):
         x = F.max_pool2d(F.relu(self.conv3(x)), (2, 2))
         x = F.max_pool2d(F.relu(self.conv4(x)), (2, 2))
         x = F.max_pool2d(F.relu(self.conv5(x)), (2, 2))
-        x = x.view(-1, self.__num_flat_features(x))
+        x = x.view(x.size(0), -1)
+        # x = x.view(-1, self.__num_flat_features(x))
         x = F.relu(self.fc1(x))
+        x = F.dropout(x, self.dp_prob)
         x = self.fc2(x)
         return x
 
