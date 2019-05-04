@@ -4,6 +4,7 @@ import os
 import sys
 import glob
 import time
+import tqdm
 import torch
 import warnings
 warnings.filterwarnings('ignore')
@@ -26,16 +27,16 @@ IMG_SIZE = 256
 
 input_partitioning_flag = False
 
-def train(train_loader, val_loader, model_path, num_epochs=10):
+def train(train_loader, val_loader, model_path, lr=0.001, num_epochs=10):
     net = models.ConvNet()
     weights = torch.randn(2)
     criterion = nn.CrossEntropyLoss(weight=weights)
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9, nesterov=True)
+    optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, nesterov=True)
     # begin train
     for epoch in tqdm(range(num_epochs)):
-        running_loss = 0.
-        train_loss = 0.
-        val_loss = 0.
+        train_loss, train_error = 0., 0.
+        val_loss, val_error = 0., 0.
+        correct, count, total = 0., 0., 0.
         # begin training
         for i, data in enumerate(train_loader, 0):
 
@@ -51,9 +52,14 @@ def train(train_loader, val_loader, model_path, num_epochs=10):
             optimizer.step()
 
             train_loss = loss.item()
-            ## @TODO: errors are done here as well
-
+            _, predicted = torch.max(outputs.data, 1)
+            count += 1
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
         # end training
+        train_loss /= count
+        train_error = 1 - (correct / total)
+        correct, count, total = 0., 0., 0.
         # begin validation
         for i, data in enumerate(val_loader, 0):
             inputs, labels = data
@@ -62,15 +68,29 @@ def train(train_loader, val_loader, model_path, num_epochs=10):
             loss = criterion(outputs, labels)
 
             val_loss += loss.item()
-            ## @TODO: errors are done here as well
-
+            _, predicted = torch.max(outputs.data, 1)
+            count += 1
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
         # end validation
+        val_loss /= count
+        val_error = 1 - (correct / total)
         # stats
-        output_string = 'train:\n\tepoch --> | lr --> | loss --> | error --> \n'
-        output_string += 'validation:\n\tepoch --> | lr --> | loss --> | error --> \n'
-        print output_string
+        output_string = 'general:\n\tepoch --> {} | lr --> {:04.3f}\n'.format(
+            epoch,
+            lr
+        )
+        output_string += 'train:\n\tloss --> {:04.3f} | error --> {:04.3f}\n'.format(
+            train_loss,
+            train_error
+        )
+        output_string += 'validation:\n\tloss --> {:04.3f} | error --> {:04.3f}\n'.format(
+            val_loss,
+            val_error
+        )
+        # print output_string
+        tqdm.write(output_string)
     # end train
-
     # save model
     torch.save(net, model_path)
     return
